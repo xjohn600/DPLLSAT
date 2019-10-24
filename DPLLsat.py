@@ -243,16 +243,22 @@ def propagateUnits(clauses, var):
     for clause in unitClauses:
         if (-var in clause):
             return False
-    clauses = [clause for clause in clauses if -var in clause]
-    # print(clauses)
-    for clause in clauses:
-        clause.remove(-var)
+    negRemoved = [[item for item in clause if item != -var] for clause in clauses if -var in clause]
+    # negRemoved = [-var for x in negClauses if -var not in negClauses]
+    # negRemoved = [[x for x in clause if -var in clause] for clause in clauses if -var in clause]
+    # print(negRemoved, -var)
+    clauses = [clause for clause in clauses if -var not in clause]
+    # for clause in clausesSubtracted:
+    #     print("removing")
+    #     clause.remove(-var)
     # for clause in clauses:
     #     if (-var in clause):
     #         if (len(clause) == 1):
     #             return False
     #         clause.remove(-var)
+    clauses = clauses + negRemoved
     clauses = [x for x in clauses if x != []]
+    # print(clauses)
     # print("after:", clauses)
     return clauses
 def removeVar(clauses, var):
