@@ -5,7 +5,7 @@
 # Please enter the number of hours you spent on this
 # assignment here
 """
-num_hours_i_spent_on_this_assignment = 
+num_hours_i_spent_on_this_assignment = 20
 """
 #
 #####################################################
@@ -19,7 +19,8 @@ num_hours_i_spent_on_this_assignment =
 # course to you? (We will anonymize these before reading them.)
 """
 <Your feedback goes here>
-
+Lectures are very engaging and easy to understand once explained by Maxwell. The problem questions explained in class are quite challenging. The assignments are quite time consuming. The difficulty of trying to figure out why it's running so slow on larger tests
+were really hard to debug and figure out. It took up the majority of my time. However, I learned a lot from this assignment. It was a well implemented assignment.
 
 """
 #####################################################
