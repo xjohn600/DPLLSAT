@@ -31,6 +31,7 @@ import time
 import numpy as np
 sys.setrecursionlimit(10000)
 
+
 class SatInstance:
     def __init__(self):
         pass
@@ -144,21 +145,22 @@ def solve_dpll(instance, verbosity):
 def DPLLsat(clauses, variables, assignment):
     #when it doesnt find sol, return false,
     #when returned false, 
-    print("DPLLSAT", clauses, variables, assignment)
+    # print("DPLLSAT", clauses, variables, assignment, len(clauses))
     if (len(clauses) == 0):
-        print("returned: ", assignment)
+        # print("returned: ", assignment)
         return assignment
     if (len(variables) == 0):
         # popped = assignment.pop()
         return False
         # print("hello")
-    pure = findPure(clauses)
+    pure = findUnit(clauses)
     if (pure != False):
         targetVar = pure
-        if (abs(targetVar[0]) in variables):
-            variables.remove(abs(targetVar[0]))
-        assignment.add(targetVar[0])
-        result = DPLLsat(removeVar(clauses, targetVar[0]), variables, assignment)
+        # print("Pure:", pure)
+        if (abs(targetVar) in variables):
+            variables.remove(abs(targetVar))
+        assignment.add(targetVar)
+        result = DPLLsat(removeVar(clauses, targetVar), variables, assignment)
         if (result != False):
             return result
         return False
@@ -167,20 +169,23 @@ def DPLLsat(clauses, variables, assignment):
         # print("target:", targetVar)
         assignmentPos = copy.deepcopy(assignment)
         assignmentNeg = copy.deepcopy(assignment)
+        variablesPos = copy.deepcopy(variables)
+        variablesNeg = copy.deepcopy(variables)
+        clausesPos = copy.deepcopy(clauses)
+        clausesNeg = copy.deepcopy(clauses)
         assignmentPos.add(targetVar)
         assignmentNeg.add(-targetVar)
-        variables.remove(targetVar)
-        result1 = DPLLsat(removeVar(clauses, targetVar), variables, assignmentPos)
+        variablesPos.remove(targetVar)
+        variablesNeg.remove(targetVar)
+        result1 = DPLLsat(removeVar(clausesPos, targetVar), variablesPos, assignmentPos)
         if (result1 != False):
             return result1
         #variables.append(-targetVar)
-        result2 = DPLLsat(removeVar(clauses, -targetVar), variables, assignmentNeg)
-        if (result2 == False):
-            variables.append(-targetVar)
-        else:
-            return result2
+        result2 = DPLLsat(removeVar(clausesNeg, -targetVar), variablesNeg, assignmentNeg)
+        #     variables.append(-targetVar)
+        # else:
+        return result2
         # variables.append(targetVar)
-        return False
     # for clause in clauses:
     #     if (-targetVar in clause):
     #         clausesNeg.remove(clause)
@@ -188,19 +193,24 @@ def DPLLsat(clauses, variables, assignment):
     # print(variables, assignmentPos, assignmentNeg)
     # DPLLsat(clausesPos, variables, assignmentPos)
     # DPLLsat(clausesNeg, variables, assignmentNeg)
-def findPure(clauses):
+def findUnit(clauses):
+    var = False
     for clause in clauses:
         if (len(clause) == 1):
-            print(clause)
-            return clause
-    return False
+            if (-var in clause):
+                return False
+            var = clause[0]
+                # print(clause)
+    return var
 def propagateUnits(clauses, var):
-    print("target:", -var, clauses)
+    # print("target:", -var, clauses)
     for clause in clauses:
         if (-var in clause):
+            if (len(clause) == 1):
+                return False
             clause.remove(-var)
     clauses = [x for x in clauses if x != []]
-    print("after:", clauses)
+    # print("after:", clauses)
     return clauses
 def removeVar(clauses, var):
     # for clause in clauses:
@@ -208,8 +218,11 @@ def removeVar(clauses, var):
     #     if (var in clause):
     #         print("finds var")
     #         clauses.remove(clause)
-    clauses = [clause for clause in clauses if var not in clause]
-    propagateUnits(clauses, var)
+    # original = copy.deepcopy(clauses)
+    ret = propagateUnits(clauses, var)
+    if (ret == False):
+        return clauses
+    clauses = [clause for clause in ret if var not in clause]
     # print(var, clauses)
     return clauses
             # assignmentPos.add(targetVar)
