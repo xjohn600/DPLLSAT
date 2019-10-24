@@ -238,11 +238,20 @@ def findPure(clauses, variables):
     return False
 def propagateUnits(clauses, var):
     # print("target:", -var, clauses)
-    for clause in clauses:
+    unitClauses = [clause for clause in clauses if len(clause) == 1]
+    # print(unitClauses)
+    for clause in unitClauses:
         if (-var in clause):
-            if (len(clause) == 1):
-                return False
-            clause.remove(-var)
+            return False
+    clauses = [clause for clause in clauses if -var in clause]
+    # print(clauses)
+    for clause in clauses:
+        clause.remove(-var)
+    # for clause in clauses:
+    #     if (-var in clause):
+    #         if (len(clause) == 1):
+    #             return False
+    #         clause.remove(-var)
     clauses = [x for x in clauses if x != []]
     # print("after:", clauses)
     return clauses
