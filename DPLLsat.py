@@ -145,7 +145,7 @@ def solve_dpll(instance, verbosity):
 def DPLLsat(clauses, variables, assignment):
     #when it doesnt find sol, return false,
     #when returned false, 
-    # print("DPLLSAT", clauses, variables, assignment, len(clauses))
+    # print("DPLLSAT", variables, assignment, len(clauses))
     if (len(clauses) == 0):
         # print("returned: ", assignment)
         return assignment
@@ -153,12 +153,24 @@ def DPLLsat(clauses, variables, assignment):
         # popped = assignment.pop()
         return False
         # print("hello")
-    pure = findUnit(clauses)
+    pure = findPure(clauses, variables)
     if (pure != False):
         targetVar = pure
+        if (abs(targetVar) not in variables):
+            return False
+        variables.remove(abs(targetVar))
+        assignment.add(targetVar)
+        result = DPLLsat(removeVar(clauses, targetVar), variables, assignment)
+        if (result != False):
+            return result
+        return False
+    unit = findUnit(clauses)
+    if (unit != False):
+        targetVar = unit
         # print("Pure:", pure)
-        if (abs(targetVar) in variables):
-            variables.remove(abs(targetVar))
+        if (abs(targetVar) not in variables):
+            return False
+        variables.remove(abs(targetVar))
         assignment.add(targetVar)
         result = DPLLsat(removeVar(clauses, targetVar), variables, assignment)
         if (result != False):
@@ -167,17 +179,19 @@ def DPLLsat(clauses, variables, assignment):
     else:
         targetVar = random.choice(variables)
         # print("target:", targetVar)
-        assignmentPos = copy.deepcopy(assignment)
+        # assignmentPos = copy.deepcopy(assignment)
         assignmentNeg = copy.deepcopy(assignment)
-        variablesPos = copy.deepcopy(variables)
+        # variablesPos = copy.deepcopy(variables)
         variablesNeg = copy.deepcopy(variables)
-        clausesPos = copy.deepcopy(clauses)
+        # clausesPos = copy.deepcopy(clauses)
         clausesNeg = copy.deepcopy(clauses)
-        assignmentPos.add(targetVar)
+        # assignmentPos.add(targetVar)
+        assignment.add(targetVar)
         assignmentNeg.add(-targetVar)
-        variablesPos.remove(targetVar)
+        # variablesPos.remove(targetVar)
+        variables.remove(targetVar)
         variablesNeg.remove(targetVar)
-        result1 = DPLLsat(removeVar(clausesPos, targetVar), variablesPos, assignmentPos)
+        result1 = DPLLsat(removeVar(clauses, targetVar), variables, assignment)
         if (result1 != False):
             return result1
         #variables.append(-targetVar)
@@ -200,8 +214,28 @@ def findUnit(clauses):
             if (-var in clause):
                 return False
             var = clause[0]
-                # print(clause)
+            # print(clause)
     return var
+def findPure(clauses, variables):
+    variables = np.append(variables, np.negative(variables))
+    # print(variables)
+    symbols = set([x for clause in clauses for x in clause])
+    for var in symbols:
+        if -var not in symbols:
+            return var
+    # for var in variables:
+    #     pure = any(-var in sublist for sublist in clauses)
+    #     if (pure == False):
+    #         return var
+    #     for clause in clauses:
+    #         if (-var in clause):
+    #             # print(var, "has neg value, breaks loop")
+    #             pure = False
+    #             break
+    #     if (pure == True):
+    #         # print(var, "has no neg value")
+    #         return var
+    return False
 def propagateUnits(clauses, var):
     # print("target:", -var, clauses)
     for clause in clauses:
@@ -223,7 +257,7 @@ def removeVar(clauses, var):
     if (ret == False):
         return clauses
     clauses = [clause for clause in ret if var not in clause]
-    # print(var, clauses)
+    # print(var)
     return clauses
             # assignmentPos.add(targetVar)
 
