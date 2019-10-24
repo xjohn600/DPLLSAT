@@ -239,13 +239,28 @@ def findPure(clauses, variables):
 def propagateUnits(clauses, var):
     # print("target:", -var, clauses)
     unitClauses = [clause for clause in clauses if len(clause) == 1]
-    # print(unitClauses)
+    # print(unitClauses, -var)
     for clause in unitClauses:
         if (-var in clause):
             return False
+    # print(unitClauses)
+                # print("target:", -var, clauses)
+    nonUnit = [clause for clause in clauses if len(clause) > 1]
+    for clause in nonUnit:
+        if (-var in clause):
+            clause.remove(-var)
+            # clause = [x for x in clause if x != -var]
+            # print("after:", clause)
+
+    clauses = [x for x in clauses if x != []]
+    # print("after:", clauses)
+    return clauses
     # print("before", clauses)
     # clausesNoVar = [clause for clause in clauses if -var not in clause]
-    negRemoved = [[item for item in clause if item != -var] for clause in clauses]
+    # clausesNeg = [clause for clause in clauses if -var in clause]
+    # for clause in clausesNeg:
+    #     clause = [x for x in clause if x != -var]
+    # negRemoved = [[item for item in clause if item != -var] for clause in clauses]
     # negRemoved = [-var for x in negClauses if -var not in negClauses]
     # negRemoved = [[x for x in clause if -var in clause] for clause in clauses if -var in clause]
     # print("after:", negRemoved, -var)
@@ -258,11 +273,7 @@ def propagateUnits(clauses, var):
     #         print("before:", clause, -var)
     #         clause = [x for x in clause if x != -var]
     #         print("after:", clause)
-    clauses = negRemoved
-    clauses = [x for x in clauses if x != []]
-    # print(clauses)
-    # print("after:", clauses)
-    return clauses
+
 def removeVar(clauses, var):
     # for clause in clauses:
     #     print("clause: ", clause)
