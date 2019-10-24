@@ -29,6 +29,8 @@ import copy
 import random
 import time
 import numpy as np
+from collections import Counter
+from itertools import chain
 sys.setrecursionlimit(10000)
 
 
@@ -177,7 +179,8 @@ def DPLLsat(clauses, variables, assignment):
             return result
         return False
     else:
-        targetVar = random.choice(variables)
+        # targetVar = random.choice(variables)
+        targetVar = choose(clauses, variables)
         # print("target:", targetVar)
         # assignmentPos = copy.deepcopy(assignment)
         assignmentNeg = copy.deepcopy(assignment)
@@ -189,8 +192,8 @@ def DPLLsat(clauses, variables, assignment):
         assignment.add(targetVar)
         assignmentNeg.add(-targetVar)
         # variablesPos.remove(targetVar)
-        variables.remove(targetVar)
-        variablesNeg.remove(targetVar)
+        variables.remove(abs(targetVar))
+        variablesNeg.remove(abs(targetVar))
         result1 = DPLLsat(removeVar(clauses, targetVar), variables, assignment)
         if (result1 != False):
             return result1
@@ -207,6 +210,16 @@ def DPLLsat(clauses, variables, assignment):
     # print(variables, assignmentPos, assignmentNeg)
     # DPLLsat(clausesPos, variables, assignmentPos)
     # DPLLsat(clausesNeg, variables, assignmentNeg)
+def choose(clauses, variables):
+    counter = Counter(chain.from_iterable(clauses))
+    # print(variables)
+    # print(counter.most_common())
+    mostCommon = counter.most_common()
+    for item in mostCommon:
+        # print(item)
+        if item[0] in variables:
+            return item[0]
+    # return(counter.most_common()[0][0])
 def findUnit(clauses):
     var = False
     for clause in clauses:
@@ -239,22 +252,26 @@ def findPure(clauses, variables):
 def propagateUnits(clauses, var):
     # print("target:", -var, clauses)
     newClauses = []
-    unitClauses = [clause for clause in clauses if (len(clause) == 1 and -var in clause)]
+    unitClauses = [clause for clause in clauses if (len(clause) == 1)]
     # print(unitClauses, -var)
-    if (len(unitClauses) > 0):
-        return False
-    # for clause in unitClauses:
-    #     if (-var in clause):
-    #         return False
+    # if (len(unitClauses) > 0):
+    #     return False
+    for clause in unitClauses:
+        if (-var in clause):
+            return False
     # print(unitClauses)
                 # print("target:", -var, clauses)
-    # nonUnit = [clause for clause in clauses if (len(clause) > 1)]
+    nonUnit = [clause for clause in clauses if (len(clause) > 1)]
     # nonUnit2 = [clause for clause in clauses if (len(clause) > 1 and -var not in clause)]
-    for clause in clauses:
+    for clause in nonUnit:
+        if (var in clause):
+            continue
         if (-var in clause):
             # clause.remove(-var)
             # print("before:", clause)
             clause = [x for x in clause if x != (-var)]
+            if not clause:
+                return False
             newClauses.append(clause)
             # print(newClauses)
         else:
@@ -265,7 +282,7 @@ def propagateUnits(clauses, var):
     # print(nonUnit)
     # newClauses = [x for x in clauses if x != []]
     # print("after:", clauses)
-    return newClauses
+    return newClauses + unitClauses
     # print("before", clauses)
     # clausesNoVar = [clause for clause in clauses if -var not in clause]
     # clausesNeg = [clause for clause in clauses if -var in clause]
